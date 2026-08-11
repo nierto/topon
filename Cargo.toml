@@ -1,0 +1,49 @@
+[package]
+name = "topon"
+version = "0.1.0"
+edition = "2021"
+# Driven by `usize::is_multiple_of` (core/equidistribution.rs), stabilized in
+# 1.87. Not verified by CI — bump deliberately if an older toolchain must build.
+rust-version = "1.87"
+description = "Deterministic geometric hashing — zero-float FixedPoint mapping of input to points on Riemannian manifolds (sphere, Euclidean, hyperbolic)"
+authors = ["Niels Erik Toren"]
+license = "Apache-2.0"
+repository = "https://github.com/nierto/topon"
+homepage = "https://github.com/nierto/topon"
+documentation = "https://docs.rs/topon"
+readme = "README.md"
+keywords = ["hash", "fixed-point", "manifold", "hyperbolic", "deterministic"]
+categories = ["algorithms", "mathematics", "data-structures"]
+exclude = ["CLAUDE.md", ".claude/"]
+
+[dependencies]
+# Published crate, NOT `path = "../gMath"`. A path dependency is a DISTINCT
+# crate from the registry one even at an identical version, so any consumer
+# depending on both Topon and the published g_math ends up with two g_math
+# instances in its graph and type errors of the form "expected FixedVector,
+# found a different FixedVector".
+#
+# The failure mode is easy to miss: it stays hidden for as long as every crate
+# in the workspace is forced onto the same local path by a [patch.crates-io],
+# and only appears when that patch is retired and the graph splits.
+#
+# For cross-repo work against an unpublished gMath, add a [patch.crates-io] to
+# the CONSUMING binary's manifest — that unifies the entire graph — rather than
+# reintroducing a path dependency here.
+g_math = "0.4.33"
+
+[dev-dependencies]
+# None — all tests use real g_math computation
+
+[lints.rust.unexpected_cfgs]
+level = "warn"
+check-cfg = [
+    'cfg(table_format, values("q16_16", "q32_32", "q64_64", "q128_128", "q256_256", "q512_512"))',
+    'cfg(q16_16)', 'cfg(q32_32)', 'cfg(q64_64)', 'cfg(q128_128)', 'cfg(q256_256)', 'cfg(q512_512)',
+]
+
+[profile.release]
+debug = false
+lto = true
+codegen-units = 1
+opt-level = 3

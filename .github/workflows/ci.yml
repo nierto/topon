@@ -1,0 +1,75 @@
+name: CI
+
+# PAUSED — manual trigger only.
+#
+# Actions minutes are billable on private repositories, and this workflow is
+# not cheap: a 5-profile matrix plus clippy and rustdoc is 7 jobs, and the
+# balanced/scientific profiles spend 1–2 minutes each in the 150k-path
+# collision scan alone.
+#
+# Run it on demand from the Actions tab -> CI -> "Run workflow".
+#
+# TO RE-ENABLE automatic runs (do this when the repo goes public — Actions is
+# free for public repositories), replace the `on:` block below with:
+#
+#   on:
+#     push:
+#       branches: [main]
+#     pull_request:
+#     workflow_dispatch:
+#
+on:
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: test (${{ matrix.profile }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Precision profile is a compile-time cfg (see build.rs). All five
+        # advertised profiles are covered: the hash path and the test suite
+        # must build and pass at every Q-format the README claims support for.
+        profile: [realtime, compact, embedded, balanced, scientific]
+    env:
+      GMATH_PROFILE: ${{ matrix.profile }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.profile }}
+      # Release mode: the 150k-path collision scan is impractically slow
+      # unoptimized (and is #[ignore]d in debug builds).
+      - run: cargo test --release
+      - run: cargo run --release --example compare
+      - run: cargo run --release --example bench
+
+  lint:
+    name: clippy
+    runs-on: ubuntu-latest
+    env:
+      GMATH_PROFILE: embedded
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo clippy --all-targets -- -D warnings
+
+  docs:
+    name: rustdoc
+    runs-on: ubuntu-latest
+    env:
+      GMATH_PROFILE: embedded
+      RUSTDOCFLAGS: -D warnings
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo doc --no-deps
