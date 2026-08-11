@@ -1,24 +1,9 @@
 name: CI
 
-# PAUSED — manual trigger only.
-#
-# Actions minutes are billable on private repositories, and this workflow is
-# not cheap: a 5-profile matrix plus clippy and rustdoc is 7 jobs, and the
-# balanced/scientific profiles spend 1–2 minutes each in the 150k-path
-# collision scan alone.
-#
-# Run it on demand from the Actions tab -> CI -> "Run workflow".
-#
-# TO RE-ENABLE automatic runs (do this when the repo goes public — Actions is
-# free for public repositories), replace the `on:` block below with:
-#
-#   on:
-#     push:
-#       branches: [main]
-#     pull_request:
-#     workflow_dispatch:
-#
 on:
+  push:
+    branches: [main]
+  pull_request:
   workflow_dispatch:
 
 env:
