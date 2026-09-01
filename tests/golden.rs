@@ -51,12 +51,9 @@ const CASES: &[(&str, &str)] = &[
     ("speed/s8/example.com", "1dcc9d46541a0cb9"),
     ("speed/s8/binary", "79a708e6dcc5b3b9"),
     ("speed/s16/long-4kb", "627cc66d9228f09b"),
-    ("hier/h16/deep.sub.example.com", "0deff96b9015a869"),
-    ("hier/h16/taxonomy", "731c05a85f7c1384"),
-    ("hier/h16/taxonomy-depth8", "8396243448a98e6c"),
-    // Identical to domain/s16/example.com by construction — the shim is
-    // exactly DomainHasher::hash_domain, and "example.com" normalizes to
-    // itself. That equality is the point: it pins the shim to the mode.
+    ("hier/h16/deep.sub.example.com", "4087b98c830e78e6"),
+    ("hier/h16/taxonomy", "416da27557c8c140"),
+    ("hier/h16/taxonomy-depth8", "4e2a6fd667b7cdb4"),
     ("compat/s16/example.com", "01db5747a6cdd793"),
     ("domain_hash/s8/UPPER.COM", "d8abab2819fe5c7e"),
 ];

@@ -6,6 +6,21 @@ Versioning tracks hash output as well as API (see "Hash stability policy" in
 the README): any release that changes hash output for any input bumps the
 minor version; patch releases are bit-identical.
 
+## 0.2.0 - 2026-08-31
+
+### Changed
+
+- **Hash output moved: g_math 0.4.33 → 0.6 (0.6.1).** The crossing includes
+  g_math 0.5.0's rounding change (binary multiply now rounds to nearest instead
+  of flooring; divide rounds to nearest instead of truncating), so fingerprints
+  that pass through inexact products or quotients differ in the last place
+  from 0.1.x. 3 of 15 golden fingerprints changed on the embedded
+  profile; the table in `tests/golden.rs` was regenerated with the tool and
+  pinned. Per the hash stability policy this is a minor bump. Also picks up
+  the 0.5.0 `acos` fix on the realtime profile. 0.6.x itself is additive
+  (certified intervals, exact predicates, fused quadratic form) and changes no
+  result.
+
 ## 0.1.0 — 2026-08-07
 
 Initial release. Licensed Apache-2.0.

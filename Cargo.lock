@@ -10,9 +10,9 @@ checksum = "c08606f8c3cbf4ce6ec8e28fb0014a2c086708fe954eaa885384a6165172e7e8"
 
 [[package]]
 name = "g_math"
-version = "0.4.33"
+version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7425c4059eac352b8448850748728471de0b36f0ae57cf4ccc998658dddbe1fa"
+checksum = "5c310ee7b42d579a4881bf218c6dd1e24abed4eea0a94c14ebb7b34eee918edd"
 dependencies = [
  "num-bigint",
  "num-integer",
@@ -61,7 +61,7 @@ dependencies = [
 
 [[package]]
 name = "topon"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "g_math",
 ]
