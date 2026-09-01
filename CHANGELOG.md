@@ -6,7 +6,7 @@ Versioning tracks hash output as well as API (see "Hash stability policy" in
 the README): any release that changes hash output for any input bumps the
 minor version; patch releases are bit-identical.
 
-## 0.2.0 - 2026-08-31
+## 0.2.0 — 2026-08-31
 
 ### Changed
 
