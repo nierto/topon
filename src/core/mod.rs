@@ -9,3 +9,4 @@ pub mod equidistribution;
 pub mod manifold;
 pub mod normalize;
 pub mod config;
+pub mod wrapping;

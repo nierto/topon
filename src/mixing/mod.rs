@@ -4,7 +4,7 @@
 //! components (pre-manifold projection). Strategies are composed with
 //! manifold projection and normalization by the mode layer.
 
-use g_math::fixed_point::imperative::FixedPoint;
+use crate::FixedPoint;
 
 use crate::ToponError;
 

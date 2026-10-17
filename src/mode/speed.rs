@@ -6,6 +6,7 @@
 //! a one-byte change anywhere in the input avalanches through the state.
 
 use g_math::fixed_point::imperative::FixedVector;
+use crate::FixedPoint;
 
 use crate::core::config::CoordinateConfig;
 use crate::core::manifold::{self, ManifoldType};
@@ -45,7 +46,7 @@ impl GeometricHash for SpeedHasher {
         "Speed (multiply-mod-1 sponge)"
     }
 
-    fn hash(&self, input: &[u8]) -> Result<FixedVector, ToponError> {
+    fn hash(&self, input: &[u8]) -> Result<FixedVector<FixedPoint>, ToponError> {
         let num = manifold::raw_components(self.config.dimension, self.config.manifold_type);
         let components = self.mixer.mix(input, num)?;
         let raw = FixedVector::from_slice(&components);

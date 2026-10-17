@@ -5,7 +5,7 @@
 //! of the hash output have no algebraic relationship — the foundation of the
 //! fractal independence property.
 
-use g_math::fixed_point::imperative::FixedPoint;
+use crate::FixedPoint;
 use g_math::fixed_point::tables::prime_table::nth_prime;
 
 use crate::ToponError;

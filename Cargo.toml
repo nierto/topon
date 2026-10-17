@@ -1,6 +1,6 @@
 [package]
 name = "topon"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 # Driven by `usize::is_multiple_of` (core/equidistribution.rs), stabilized in
 # 1.87. Not verified by CI — bump deliberately if an older toolchain must build.
@@ -30,7 +30,7 @@ exclude = ["CLAUDE.md", ".claude/"]
 # For cross-repo work against an unpublished gMath, add a [patch.crates-io] to
 # the CONSUMING binary's manifest — that unifies the entire graph — rather than
 # reintroducing a path dependency here.
-g_math = "0.6"
+g_math = "0.7"
 
 [dev-dependencies]
 # None — all tests use real g_math computation

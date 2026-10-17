@@ -8,6 +8,7 @@
 //! output dimension), so this function pays that cost on every call.
 
 use g_math::fixed_point::imperative::FixedVector;
+use crate::FixedPoint;
 
 use crate::core::config::CoordinateConfig;
 use crate::mode::domain::DomainHasher;
@@ -24,7 +25,7 @@ use crate::{DomainHash, ToponError};
 pub fn domain_to_coordinates(
     domain: &str,
     config: &CoordinateConfig,
-) -> Result<FixedVector, ToponError> {
+) -> Result<FixedVector<FixedPoint>, ToponError> {
     let hasher = DomainHasher::new(config.clone())?;
     hasher.hash_domain(domain)
 }

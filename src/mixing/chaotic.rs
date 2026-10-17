@@ -18,10 +18,11 @@
 //! transcendentals in the absorb loop, and ONE `sin()` per output dimension
 //! in the squeeze step.
 
-use g_math::fixed_point::imperative::FixedPoint;
+use crate::FixedPoint;
 
 use crate::core::constants::{constant_bank, sqrt_nth_prime};
 use crate::core::equidistribution::{frac, wave_fold};
+use crate::core::wrapping::{wrapping_add, wrapping_mul};
 use crate::ToponError;
 use super::MixingStrategy;
 
@@ -109,9 +110,9 @@ impl MixingStrategy for ChaoticMixer {
         for d in 0..num_components {
             let mut acc = FixedPoint::ZERO;
             for (i, lane) in lanes.iter().enumerate() {
-                acc += *lane * self.constants[(d + i) % n];
+                acc = wrapping_add(acc, wrapping_mul(*lane, self.constants[(d + i) % n]));
             }
-            components.push(wave_fold(acc * self.constants[d % n])?);
+            components.push(wave_fold(wrapping_mul(acc, self.constants[d % n]))?);
         }
 
         Ok(components)

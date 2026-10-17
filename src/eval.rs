@@ -19,7 +19,8 @@
 //! dimensionality — is `FixedPoint` throughout, and every hash path in the
 //! crate is float-free.
 
-use g_math::fixed_point::imperative::{FixedPoint, FixedVector};
+use g_math::fixed_point::imperative::FixedVector;
+use crate::FixedPoint;
 
 use crate::core::manifold::geodesic_distance;
 use crate::{ToponError, GeometricHash, ManifoldType};
@@ -75,7 +76,7 @@ pub fn evaluate_hasher(
     let manifold = hasher.manifold_type();
 
     // Hash all domains
-    let hashes: Vec<FixedVector> = test_domains
+    let hashes: Vec<FixedVector<FixedPoint>> = test_domains
         .iter()
         .map(|d| hasher.hash(d.as_bytes()))
         .collect::<Result<_, _>>()?;
@@ -132,7 +133,7 @@ pub fn evaluate_hasher(
 // Metric implementations
 // ============================================================================
 
-fn vectors_equal(a: &FixedVector, b: &FixedVector) -> bool {
+fn vectors_equal(a: &FixedVector<FixedPoint>, b: &FixedVector<FixedPoint>) -> bool {
     if a.len() != b.len() {
         return false;
     }
@@ -145,7 +146,7 @@ fn vectors_equal(a: &FixedVector, b: &FixedVector) -> bool {
 }
 
 fn pairwise_distances(
-    hashes: &[FixedVector],
+    hashes: &[FixedVector<FixedPoint>],
     manifold: ManifoldType,
 ) -> Result<(FixedPoint, FixedPoint), ToponError> {
     let n = hashes.len();
@@ -219,7 +220,7 @@ fn avalanche_distances(
 }
 
 fn component_statistics(
-    hashes: &[FixedVector],
+    hashes: &[FixedVector<FixedPoint>],
     output_dim: usize,
     n_fp: FixedPoint,
 ) -> (Vec<FixedPoint>, Vec<FixedPoint>) {
@@ -272,7 +273,7 @@ fn variance_of(values: &[FixedPoint], mean: FixedPoint) -> FixedPoint {
 }
 
 fn max_abs_correlation(
-    hashes: &[FixedVector],
+    hashes: &[FixedVector<FixedPoint>],
     means: &[FixedPoint],
     variances: &[FixedPoint],
     output_dim: usize,

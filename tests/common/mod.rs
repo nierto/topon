@@ -11,12 +11,13 @@
 #![allow(dead_code)] // each integration test binary uses a different subset
 
 use g_math::fixed_point::imperative::FixedVector;
+use topon::FixedPoint;
 
 /// FNV-1a over the exact raw bits of every component.
 ///
 /// Exact: two vectors share a fingerprint only if every component's raw
 /// fixed-point value renders identically.
-pub fn fingerprint_u64(v: &FixedVector) -> u64 {
+pub fn fingerprint_u64(v: &FixedVector<FixedPoint>) -> u64 {
     const OFFSET: u64 = 0xcbf2_9ce4_8422_2325;
     const PRIME: u64 = 0x0000_0100_0000_01b3;
 
@@ -41,7 +42,7 @@ pub fn fingerprint_u64(v: &FixedVector) -> u64 {
 }
 
 /// Hex rendering of [`fingerprint_u64`], for pinning in golden tests.
-pub fn fingerprint(v: &FixedVector) -> String {
+pub fn fingerprint(v: &FixedVector<FixedPoint>) -> String {
     format!("{:016x}", fingerprint_u64(v))
 }
 

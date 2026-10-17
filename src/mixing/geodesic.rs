@@ -27,10 +27,12 @@
 //! shrinks with depth) a depth-8 walk uses at most H₈ ≈ 2.72 of the budget,
 //! so the clamp never binds in normal operation — it is a safety invariant.
 
-use g_math::fixed_point::imperative::{FixedPoint, FixedVector};
+use g_math::fixed_point::imperative::FixedVector;
+use crate::FixedPoint;
 use g_math::fixed_point::imperative::manifold::{HyperbolicSpace, Manifold};
 
 use crate::core::constants::constant_bank;
+use crate::core::wrapping::{wrapping_add, wrapping_from_int, wrapping_mul};
 use crate::core::manifold::hyperboloid_lift;
 use crate::ToponError;
 
@@ -71,14 +73,14 @@ impl Default for WalkLimits {
 /// one full walk per LEAF.
 #[derive(Clone)]
 pub struct GeodesicWalk {
-    point: FixedVector,
+    point: FixedVector<FixedPoint>,
     depth: usize,
     used_radius: FixedPoint,
 }
 
 impl GeodesicWalk {
     /// Current on-hyperboloid point (not yet re-lifted; see `finish`).
-    pub fn point(&self) -> &FixedVector {
+    pub fn point(&self) -> &FixedVector<FixedPoint> {
         &self.point
     }
 
@@ -144,12 +146,12 @@ impl GeodesicMixer {
         let mut direction = vec![FixedPoint::ZERO; dim];
 
         for (pos, &byte) in label.iter().enumerate() {
-            let byte_fp = FixedPoint::from_int(byte as i32 + 1);
-            let pos_fp = FixedPoint::from_int(pos as i32 + 1);
+            let byte_fp = wrapping_from_int(byte as i32 + 1);
+            let pos_fp = wrapping_from_int(pos as i32 + 1);
 
             for (d, component) in direction.iter_mut().enumerate() {
                 let c = self.constants[(pos + d + depth * 37) % n];
-                *component += byte_fp * c * pos_fp;
+                *component = wrapping_add(*component, wrapping_mul(wrapping_mul(byte_fp, c), pos_fp));
             }
         }
 
@@ -163,12 +165,12 @@ impl GeodesicMixer {
     /// Build a tangent vector at `point` on the hyperboloid from spatial components.
     fn build_tangent(
         &self,
-        point: &FixedVector,
+        point: &FixedVector<FixedPoint>,
         spatial: &[FixedPoint],
         step_size: FixedPoint,
         dim: usize,
         manifold: &HyperbolicSpace,
-    ) -> FixedVector {
+    ) -> FixedVector<FixedPoint> {
         // Minkowski orthogonality: v₀ = Σ(vᵢ · pᵢ) / p₀
         let mut spatial_dot = FixedPoint::ZERO;
         for d in 0..dim {
@@ -253,7 +255,7 @@ impl GeodesicMixer {
     }
 
     /// Finalize a walk: re-project to enforce the hyperboloid constraint.
-    pub fn finish(&self, walk: &GeodesicWalk, dimension: usize) -> Result<FixedVector, ToponError> {
+    pub fn finish(&self, walk: &GeodesicWalk, dimension: usize) -> Result<FixedVector<FixedPoint>, ToponError> {
         let spatial: Vec<FixedPoint> = (1..=dimension).map(|d| walk.point[d]).collect();
         hyperboloid_lift(&spatial)
     }
@@ -263,7 +265,7 @@ impl GeodesicMixer {
         &self,
         input: &[u8],
         dimension: usize,
-    ) -> Result<FixedVector, ToponError> {
+    ) -> Result<FixedVector<FixedPoint>, ToponError> {
         let mut labels: Vec<&[u8]> = input.split(|&b| b == self.separator).collect();
         if self.order == LabelOrder::RootLast {
             labels.reverse();

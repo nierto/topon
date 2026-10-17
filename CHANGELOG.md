@@ -6,6 +6,43 @@ Versioning tracks hash output as well as API (see "Hash stability policy" in
 the README): any release that changes hash output for any input bumps the
 minor version; patch releases are bit-identical.
 
+## 0.3.0 — 2026-10-17
+
+### Changed
+
+- **Hash output moved: g_math 0.6.1 → 0.7.0.** 0.7 rounds its
+  transcendentals and closed-form hyperboloid maps correctly, so:
+  - Hierarchical mode: every vector differs in the last places. Over 303
+    paths at H^16 / Q64.64, 64% of components moved, by at most 6 units
+    (3.3e-19).
+  - Domain and speed mode: output moves only where a `sin()` fold lands on
+    an argument 0.6 misrounded by one unit (of 200,000 random full-range
+    arguments: 333 at Q32.32, 105 at Q64.64; at Q16.16, 10 of 2,000,000
+    near the top of the range). The accumulators amplify
+    that unit, so an affected vector differs entirely. Measured over 224
+    vectors per mode: at Q64.64, 1 domain and 1 speed vector changed; more
+    at the narrow profiles, where long input and high dimension mean more
+    folds.
+
+  3 of 15 golden fingerprints changed on the embedded profile (the
+  hierarchical cases); the table in `tests/golden.rs` was regenerated with
+  the tool and pinned. Per the hash stability policy this is a minor bump.
+- **The accumulators wrap explicitly.** The mixers rely on overflow wrapping
+  modulo the storage word as their reduction step. Since g_math 0.6.4 `+`,
+  `*` and `from_int` panic on overflow instead, and 0.7 has no wrapping
+  twin, so the bump alone panicked from safe code at realtime and compact
+  (e.g. any input over 32,767 bytes at Q16.16). `core::wrapping` restores
+  the 0.6.1 semantics: 600,000 random full-range operations per profile
+  (realtime, compact, embedded) match 0.6.1 exactly. A new test,
+  `overflowing_input_does_not_panic`, pins it at every profile.
+- **`FixedVector` names its element.** g_math 0.7 makes the format a type and
+  drops `FixedPoint` and the `GMATH_PROFILE` environment. Topon keeps the
+  compile-time profile: `build.rs` maps `GMATH_PROFILE` (and `GMATH_FRAC_BITS`
+  on realtime) to the new public alias `topon::FixedPoint`, and the API
+  returns `FixedVector<FixedPoint>` where it returned `FixedVector`.
+  Downstream code that named `g_math::...::FixedPoint` names
+  `topon::FixedPoint` instead.
+
 ## 0.2.0 — 2026-08-31
 
 ### Changed

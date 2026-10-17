@@ -15,6 +15,7 @@
 //! rationale.
 
 use g_math::fixed_point::imperative::FixedVector;
+use crate::FixedPoint;
 
 use crate::core::config::CoordinateConfig;
 use crate::core::manifold::ManifoldType;
@@ -109,7 +110,7 @@ impl HierarchicalHasher {
     }
 
     /// Finalize an incremental walk (hyperboloid re-projection).
-    pub fn finish(&self, walk: &GeodesicWalk) -> Result<FixedVector, ToponError> {
+    pub fn finish(&self, walk: &GeodesicWalk) -> Result<FixedVector<FixedPoint>, ToponError> {
         self.mixer.finish(walk, self.config.dimension)
     }
 }
@@ -119,7 +120,7 @@ impl GeometricHash for HierarchicalHasher {
         "Hierarchical (geodesic walk)"
     }
 
-    fn hash(&self, input: &[u8]) -> Result<FixedVector, ToponError> {
+    fn hash(&self, input: &[u8]) -> Result<FixedVector<FixedPoint>, ToponError> {
         self.mixer.mix_hierarchical(input, self.config.dimension)
     }
 

@@ -18,7 +18,7 @@
 //! ## Regenerating (only for a deliberate, version-bumped output change)
 //!
 //! ```text
-//! GMATH_PROFILE=embedded cargo test --test golden -- --nocapture regenerate
+//! GMATH_PROFILE=embedded cargo test --test golden -- --ignored --nocapture regenerate
 //! ```
 //!
 //! That prints the current fingerprints; paste them into `CASES` below and
@@ -51,9 +51,9 @@ const CASES: &[(&str, &str)] = &[
     ("speed/s8/example.com", "1dcc9d46541a0cb9"),
     ("speed/s8/binary", "79a708e6dcc5b3b9"),
     ("speed/s16/long-4kb", "627cc66d9228f09b"),
-    ("hier/h16/deep.sub.example.com", "4087b98c830e78e6"),
-    ("hier/h16/taxonomy", "416da27557c8c140"),
-    ("hier/h16/taxonomy-depth8", "4e2a6fd667b7cdb4"),
+    ("hier/h16/deep.sub.example.com", "0bed75ef5ff0651e"),
+    ("hier/h16/taxonomy", "955d076f117ed700"),
+    ("hier/h16/taxonomy-depth8", "6ad7d61a90ac556b"),
     ("compat/s16/example.com", "01db5747a6cdd793"),
     ("domain_hash/s8/UPPER.COM", "d8abab2819fe5c7e"),
 ];
@@ -165,7 +165,7 @@ fn golden_vectors_are_stable() {
         drift.is_empty(),
         "hash output changed for {} case(s) — this is a BREAKING output change.\n\
          If deliberate: bump the minor version per the README stability policy, \
-         regenerate with `cargo test --test golden -- --nocapture regenerate`, and \
+         regenerate with `cargo test --test golden -- --ignored --nocapture regenerate`, and \
          note it in CHANGELOG.md.\n{}",
         drift.len(),
         drift.join("\n")

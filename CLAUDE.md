@@ -8,7 +8,7 @@ Topon is a deterministic geometric hashing library (part of the Geodineum ecosys
 
 ## Commands
 
-Precision profile is selected at **compile time** via the `GMATH_PROFILE` env var (build.rs turns it into a `table_format` cfg; changing it triggers a rebuild). Values: `realtime` (Q16.16), `compact`/`fast` (Q32.32), `embedded` (Q64.64, the default and recommended), `balanced` (Q128.128), `scientific` (Q256.256).
+Precision profile is selected at **compile time** via the `GMATH_PROFILE` env var (build.rs turns it into a `table_format` cfg and the `topon::FixedPoint` alias — g_math 0.7 itself reads no env, the format is a type; changing it triggers a rebuild). Values: `realtime` (Q16.16, or `Fixed<i32, F>` with `GMATH_FRAC_BITS=F`), `compact`/`fast` (Q32.32), `embedded` (Q64.64, the default and recommended), `balanced` (Q128.128), `scientific` (Q256.256).
 
 ```bash
 cargo build                                  # defaults to GMATH_PROFILE=embedded
@@ -30,7 +30,7 @@ There is no lint/format config beyond default `cargo clippy` / `cargo fmt`.
 
 Three layers, composed bottom-up (`src/`):
 
-- **`core/`** — shared mathematical primitives. `equidistribution.rs` is the heart: `WeylAccumulator` implements Weyl equidistribution (`{n·√p mod 1}` for per-dimension distinct primes) with `sin()` "wave folding" to produce equidistributed output in [-1, 1]. Accumulator `+`/`*` deliberately use g_math's *wrapping* ops (the wrap is the modular reduction); transcendental folds use `try_` variants and propagate overflow as `ToponError::MathOverflow`. `manifold.rs` handles projection and geodesic distance; `constants.rs` generates the √p bank; `normalize.rs` normalizes domain strings.
+- **`core/`** — shared mathematical primitives. `equidistribution.rs` is the heart: `WeylAccumulator` implements Weyl equidistribution (`{n·√p mod 1}` for per-dimension distinct primes) with `sin()` "wave folding" to produce equidistributed output in [-1, 1]. Accumulator `+`/`*` deliberately *wrap* via `core/wrapping.rs` (the wrap is the modular reduction; g_math ≥0.6.4 operators panic on overflow, so never use plain `+`/`*`/`from_int` on unbounded accumulator state — the helpers reproduce 0.6.1's wrap bit-for-bit); transcendental folds use `try_` variants and propagate overflow as `ToponError::MathOverflow`. `manifold.rs` handles projection and geodesic distance; `constants.rs` generates the √p bank; `normalize.rs` normalizes domain strings.
 - **`mixing/`** — byte-mixing strategies implementing the crate-private `MixingStrategy` trait (bytes → raw components in ~(-1,1), pre-projection): `irrational` (domain mode), `chaotic` (speed mode's expanding `x ← frac(x·√P + injection)` sponge), and `geodesic` (special case — produces hyperboloid points directly instead of raw components).
 - **`mode/`** — the user-facing hashers, each composing a mixer with manifold projection to implement the public `GeometricHash` trait (`lib.rs`): `DomainHasher` (irrational mixing, default S^128), `SpeedHasher` (throughput, arbitrary bytes), `HierarchicalHasher` (tree-structured input → hyperbolic space).
 

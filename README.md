@@ -41,8 +41,10 @@ adversarial-collision claims. It is a coordinate system for data.
 
 Four items; everything beneath them is internal.
 
-- **`GeometricHash`** — the core trait. `hash(&[u8]) -> Result<FixedVector, ToponError>`,
-  plus `output_dimension()` and `manifold_type()`.
+- **`GeometricHash`** — the core trait. `hash(&[u8]) -> Result<FixedVector<FixedPoint>, ToponError>`,
+  plus `output_dimension()` and `manifold_type()`. `topon::FixedPoint` is the
+  g_math format this build hashes in (`Q64_64` by default; see precision
+  profiles below).
 - **`DomainHash`** — blanket-implemented for every `GeometricHash`, adding
   `hash_domain(&str)` which normalizes (lowercase, trim, strip trailing dots)
   before hashing.
@@ -241,15 +243,19 @@ At the recommended configuration (Q64.64, dim 16) the birthday bound is 2^512.
 At dim 8 it is 2^256, matching SHA-256's output space.
 
 **Precision profiles.** Selected at compile time via `GMATH_PROFILE`; `build.rs`
-turns it into a `cfg`, so changing it triggers a rebuild.
+turns it into a `cfg` and into the `topon::FixedPoint` type alias, so changing
+it triggers a rebuild. Since g_math 0.7 the format is a type and g_math reads
+no environment: topon's `build.rs` keeps the variable and maps it to the type.
+On `realtime`, `GMATH_FRAC_BITS` (2..=30, default 16) sets the split, as in
+g_math 0.6.
 
 | Value | Format | |
 |---|---|---|
-| `realtime` | Q16.16 | narrowest, fastest |
-| `compact` / `fast` | Q32.32 | |
-| `embedded` | Q64.64 | **default and recommended** |
-| `balanced` | Q128.128 | |
-| `scientific` | Q256.256 | widest |
+| `realtime` | Q16.16 (`Fixed<i32, GMATH_FRAC_BITS>`) | narrowest, fastest |
+| `compact` / `fast` | Q32.32 (`Q32_32`) | |
+| `embedded` | Q64.64 (`Q64_64`) | **default and recommended** |
+| `balanced` | Q128.128 (`Q128_128`) | |
+| `scientific` | Q256.256 (`Q256_256`) | widest |
 
 **Evaluation harness.**
 

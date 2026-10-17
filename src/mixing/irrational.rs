@@ -5,10 +5,11 @@
 //! Best empirical metrics of all strategies (eff dim 16.3/17, min dist 0.74
 //! on S^16).
 
-use g_math::fixed_point::imperative::FixedPoint;
+use crate::FixedPoint;
 
 use crate::core::constants::constant_bank;
 use crate::core::equidistribution::WeylAccumulator;
+use crate::core::wrapping::{wrapping_from_int, wrapping_mul};
 use crate::ToponError;
 use super::MixingStrategy;
 
@@ -45,7 +46,7 @@ impl IrrationalMixer {
         for (pos, &base) in positional.iter().enumerate() {
             // Dual-constant addressing: coprime strides avoid alignment
             let secondary = self.constants[(pos * 7 + dim_index * 3 + 1) % n];
-            let contribution = base * secondary;
+            let contribution = wrapping_mul(base, secondary);
 
             acc.absorb_with_periodic_fold(contribution, pos, FOLD_PERIOD)?;
         }
@@ -68,7 +69,7 @@ impl MixingStrategy for IrrationalMixer {
             .iter()
             .enumerate()
             .map(|(pos, &byte)| {
-                FixedPoint::from_int(byte as i32 + 1) * FixedPoint::from_int(pos as i32 + 1)
+                wrapping_mul(wrapping_from_int(byte as i32 + 1), wrapping_from_int(pos as i32 + 1))
             })
             .collect();
 

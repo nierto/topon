@@ -9,13 +9,15 @@
 //! This module formalizes these properties into a reusable accumulator that
 //! every mixing strategy builds upon.
 //!
-//! Note on overflow: accumulator arithmetic deliberately uses g_math's
-//! wrapping `+`/`*` — the wrap acts as the modular reduction of the state.
-//! Transcendental folds use the `try_` variants and propagate overflow.
+//! Note on overflow: accumulator arithmetic deliberately wraps (see
+//! [`super::wrapping`]) — the wrap acts as the modular reduction of the
+//! state. Transcendental folds use the `try_` variants and propagate overflow.
 
-use g_math::fixed_point::imperative::{FixedPoint, OverflowDetected};
+use g_math::fixed_point::imperative::OverflowDetected;
+use crate::FixedPoint;
 
 use super::constants::sqrt_nth_prime;
+use super::wrapping::{wrapping_add, wrapping_from_int, wrapping_mul};
 use crate::ToponError;
 
 /// A Weyl accumulator for one dimension of the hash output.
@@ -47,9 +49,9 @@ impl WeylAccumulator {
     ///
     /// Initialized to `√p_i * (i + 1)` — a dimension-dependent seed.
     pub fn with_constant(irrational: FixedPoint, dim_index: usize) -> Self {
-        let dim_fp = FixedPoint::from_int((dim_index as i32).wrapping_add(1));
+        let dim_fp = wrapping_from_int((dim_index as i32).wrapping_add(1));
         WeylAccumulator {
-            state: irrational * dim_fp,
+            state: wrapping_mul(irrational, dim_fp),
             irrational,
         }
     }
@@ -61,7 +63,7 @@ impl WeylAccumulator {
     /// The irrational multiplier ensures no periodic collisions.
     #[inline]
     pub fn absorb(&mut self, contribution: FixedPoint) {
-        self.state = self.state * self.irrational + contribution;
+        self.state = wrapping_add(wrapping_mul(self.state, self.irrational), contribution);
     }
 
     /// Absorb a contribution, folding via `sin()` every `period` steps.

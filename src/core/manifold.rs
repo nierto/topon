@@ -8,7 +8,8 @@ use g_math::fixed_point::imperative::fused;
 use g_math::fixed_point::imperative::manifold::{
     EuclideanSpace, HyperbolicSpace, Manifold, Sphere,
 };
-use g_math::fixed_point::imperative::{FixedPoint, FixedVector};
+use g_math::fixed_point::imperative::FixedVector;
+use crate::FixedPoint;
 
 use crate::ToponError;
 
@@ -32,7 +33,7 @@ pub enum ManifoldType {
 /// accumulation and the square root all stay at compute tier with a single
 /// rounding at the end — instead of rounding once per `x*x`, once per `+=`,
 /// and again at the `sqrt`.
-pub fn hyperboloid_lift(spatial: &[FixedPoint]) -> Result<FixedVector, ToponError> {
+pub fn hyperboloid_lift(spatial: &[FixedPoint]) -> Result<FixedVector<FixedPoint>, ToponError> {
     // Seed slot 0 with 1 so the fused norm computes √(1 + Σxᵢ²) directly,
     // then overwrite it with the result — one allocation, no second pass.
     let mut components = Vec::with_capacity(spatial.len() + 1);
@@ -48,9 +49,9 @@ pub fn hyperboloid_lift(spatial: &[FixedPoint]) -> Result<FixedVector, ToponErro
 /// - **Euclidean**: pass through unchanged.
 /// - **Hyperbolic**: hyperboloid model — prepend x₀ = √(1 + Σxᵢ²).
 pub fn project_to_manifold(
-    raw: &FixedVector,
+    raw: &FixedVector<FixedPoint>,
     manifold_type: ManifoldType,
-) -> Result<FixedVector, ToponError> {
+) -> Result<FixedVector<FixedPoint>, ToponError> {
     match manifold_type {
         ManifoldType::Sphere => {
             let norm_sq = raw.length_squared();
@@ -83,8 +84,8 @@ pub fn project_to_manifold(
 /// on the hyperboloid. Both points must lie on the manifold (as all Topon
 /// hash outputs do).
 pub fn geodesic_distance(
-    a: &FixedVector,
-    b: &FixedVector,
+    a: &FixedVector<FixedPoint>,
+    b: &FixedVector<FixedPoint>,
     manifold_type: ManifoldType,
 ) -> Result<FixedPoint, ToponError> {
     let d = match manifold_type {

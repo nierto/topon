@@ -5,7 +5,7 @@
 //! 150k-path collision scan. All tests are written for the realtime Q22.10
 //! profile (tolerances follow tests/basic.rs).
 
-use g_math::fixed_point::imperative::FixedPoint;
+use topon::FixedPoint;
 use g_math::fixed_point::imperative::FixedVector;
 use topon::{
     geodesic_distance, CoordinateConfig, ToponError, GeometricHash, HierarchicalHasher, LabelOrder,
@@ -24,7 +24,7 @@ fn taxonomy_hasher() -> HierarchicalHasher {
     HierarchicalHasher::taxonomy(config(DIM)).unwrap()
 }
 
-fn dist(a: &FixedVector, b: &FixedVector) -> f64 {
+fn dist(a: &FixedVector<FixedPoint>, b: &FixedVector<FixedPoint>) -> f64 {
     geodesic_distance(a, b, ManifoldType::Hyperbolic).unwrap().to_f64()
 }
 
@@ -135,7 +135,7 @@ fn siblings_are_separated() {
         "science/geology",
         "science/astronomy",
     ];
-    let points: Vec<FixedVector> =
+    let points: Vec<FixedVector<FixedPoint>> =
         siblings.iter().map(|p| h.hash(p.as_bytes()).unwrap()).collect();
 
     for i in 0..points.len() {

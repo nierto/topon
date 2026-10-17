@@ -114,6 +114,23 @@ fn empty_input_does_not_panic() {
     }
 }
 
+/// Inputs that overflow the storage word must wrap, not panic. Past 32,767
+/// bytes the position no longer fits Q16.16, and the accumulators overflow
+/// it on far shorter input; g_math 0.6.4+ operators panic on overflow, so
+/// this pins the explicit wrap in `core::wrapping` at every profile.
+#[test]
+fn overflowing_input_does_not_panic() {
+    // No '.' (the hierarchical separator): one 33 kB label, not a deep path.
+    let long: Vec<u8> = (0..33_000u32)
+        .map(|i| (i.wrapping_mul(2_654_435_761) >> 24) as u8)
+        .map(|b| if b == b'.' { b'a' } else { b })
+        .collect();
+    for hasher in all_hashers() {
+        let point = hasher.hash(&long).unwrap_or_else(|e| panic!("{}: {}", hasher.name(), e));
+        assert_eq!(point.len(), hasher.output_dimension(), "{}", hasher.name());
+    }
+}
+
 #[test]
 fn distinct_inputs_are_distant() {
     for hasher in all_hashers() {

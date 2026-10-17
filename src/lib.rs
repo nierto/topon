@@ -25,12 +25,15 @@
 //! 1.0 output may change between releases: any release that changes output
 //! for any input bumps the minor version; patch releases are bit-identical.
 //! Output depends on the compile-time `GMATH_PROFILE` — values are only
-//! comparable between builds using the same profile.
+//! comparable between builds using the same profile. The profile fixes
+//! [`FixedPoint`], the g_math format every coordinate is stored in.
 
 // Determinism is the crate's core guarantee; no part of it needs `unsafe`.
 #![forbid(unsafe_code)]
 
 use g_math::fixed_point::imperative::FixedVector;
+
+include!(concat!(env!("OUT_DIR"), "/format.rs"));
 
 pub mod core;
 pub mod mixing;
@@ -106,7 +109,7 @@ pub trait GeometricHash {
     fn name(&self) -> &str;
 
     /// Hash raw bytes to a coordinate vector on the configured manifold.
-    fn hash(&self, input: &[u8]) -> Result<FixedVector, ToponError>;
+    fn hash(&self, input: &[u8]) -> Result<FixedVector<FixedPoint>, ToponError>;
 
     /// Number of components in the output vector.
     fn output_dimension(&self) -> usize;
@@ -120,7 +123,7 @@ pub trait GeometricHash {
 /// Adds `hash_domain()` which normalizes the domain string (lowercase, trim,
 /// strip trailing dots) before hashing.
 pub trait DomainHash: GeometricHash {
-    fn hash_domain(&self, domain: &str) -> Result<FixedVector, ToponError> {
+    fn hash_domain(&self, domain: &str) -> Result<FixedVector<FixedPoint>, ToponError> {
         let normalized = crate::core::normalize::normalize_domain(domain)?;
         self.hash(normalized.as_bytes())
     }
