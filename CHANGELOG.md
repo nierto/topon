@@ -6,6 +6,29 @@ Versioning tracks hash output as well as API (see "Hash stability policy" in
 the README): any release that changes hash output for any input bumps the
 minor version; patch releases are bit-identical.
 
+## 0.3.1 — 2026-11-22
+
+### Changed
+
+- **g_math 0.7.0 → 0.7.3** (minimum raised to 0.7.3). Hash output is
+  bit-identical: 493 raw coordinate vectors (all three modes, up to
+  S^1144 and a 40 kB input) compared byte for byte against 0.7.0 at all five
+  profiles. Faster on every profile; at embedded, speed mode 1.3–3.5×,
+  hierarchical 4.1×, domain 1.2–1.9× (`examples/bench`, same machine).
+  0.7.1 and 0.7.2 change nothing topon calls (decompositions; wide-integer
+  signed products, which `core::wrapping` reaches only through magnitudes).
+
+### Known
+
+- **Domain mode at S^128 is ~40× slower than on g_math 0.6** (13.2 ms per
+  hash at embedded on 0.7.3; 24.6 ms on 0.7.0, which 0.3.0 shipped; 0.33 ms
+  on 0.6.1). g_math 0.7's correctly rounded `sin()` costs ~31 µs at Q64.64 for
+  arguments of magnitude 2^25 and above, which the S^128 accumulator reaches.
+  At `compact` (Q32.32) the slow path starts near 2^16, so domain mode is
+  slow from S^16 up (1.09 ms per hash; S^8 186 µs). Speed and hierarchical
+  modes are unaffected. The README performance figures are re-measured. A
+  faster `sin` in g_math fixes this without changing any hash.
+
 ## 0.3.0 — 2026-10-17
 
 ### Changed

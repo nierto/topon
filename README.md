@@ -279,24 +279,33 @@ GMATH_PROFILE=embedded cargo run --release --example bench
 
 | Dimension | Domain mode | Speed mode |
 |---|---|---|
-| S^8 | 43.5 µs | 29.8 µs |
-| S^16 | 64.5 µs | 31.9 µs |
-| S^32 | 98.5 µs | 38.3 µs |
-| S^128 | 330.8 µs | 83.4 µs |
+| S^8 | 29.9 µs | 9.0 µs |
+| S^16 | 54.9 µs | 13.8 µs |
+| S^32 | 104.1 µs | 23.3 µs |
+| S^128 | 13,155 µs | 81.4 µs |
 
-At S^16 that is ~16.2k domain hashes/sec and ~31.7k speed hashes/sec; at the
-S^128 default, ~3.0k/sec and ~12.0k/sec.
+At S^16 that is ~18.3k domain hashes/sec and ~72.6k speed hashes/sec; at the
+S^128 default, ~75/sec and ~12.3k/sec.
 
-**Bulk throughput** (speed mode, S^16): 1.7 MB/s at 64 B, rising to ~5.0 MB/s
+**Domain mode at S^128 is slow on g_math 0.7** (330.8 µs on g_math 0.6.1).
+Its `sin()` folds are correctly rounded since 0.7, and at Q64.64 an argument of
+magnitude 2^32 or more costs ~31 µs against ~0.4 µs below 2^24. At S^128 the
+per-dimension √p reaches ~26.8, so the accumulator regularly passes 2^32
+before a fold; at S^32 and below it rarely does. Because the result is
+correctly rounded, a faster large-argument `sin` in g_math will speed this up
+with bit-identical hashes. Until then, prefer S^16 or speed mode where
+throughput matters.
+
+**Bulk throughput** (speed mode, S^16): 3.4 MB/s at 64 B, rising to ~5.5 MB/s
 once the per-dimension squeeze amortizes (16 KB and above).
 
-**Hierarchical mode** (H^16, three-level path): 154.4 µs for a full path hash
-versus 57.5 µs for an incremental leaf step on an already-walked prefix — 2.7×
+**Hierarchical mode** (H^16, three-level path): 49.2 µs for a full path hash
+versus 17.5 µs for an incremental leaf step on an already-walked prefix — 2.8×
 per token, widening with depth and fan-out.
 
 Domain mode is `O(dimension × input length)`: one Weyl accumulator per output
 component. Speed mode is `O(input length + dimension)`, which is why its
-advantage grows with dimension (1.5× at S^8, 4.0× at S^128).
+advantage grows with dimension (3.3× at S^8, 4.5× at S^32).
 
 ## Limits worth knowing
 
